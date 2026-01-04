@@ -1,11 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Device, UserStats, DeviceCategory } from '../types';
 
 const ConsumerDashboard: React.FC = () => {
   const [view, setView] = useState<'OVERVIEW' | 'FIND_RECYCLERS' | 'REWARDS'>('OVERVIEW');
   const [showForm, setShowForm] = useState(false);
-  const [deviceDetails, setDeviceDetails] = useState({ category: '' as DeviceCategory | '', type: '', age: '', condition: '' });
+  const [deviceDetails, setDeviceDetails] = useState({ category: '' as DeviceCategory | '', type: '', age: '', condition: '', image: '' });
   const [activeTracking, setActiveTracking] = useState<Device | null>(null);
   const [activeCertificate, setActiveCertificate] = useState<Device | null>(null);
   const [showReferralToast, setShowReferralToast] = useState(false);
@@ -17,6 +17,8 @@ const ConsumerDashboard: React.FC = () => {
   const [isLocating, setIsLocating] = useState(false);
   const [nearbyRecyclers, setNearbyRecyclers] = useState<any[]>([]);
   const [locationError, setLocationError] = useState<string | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Gamification State
   const [stats, setStats] = useState<UserStats>({
@@ -43,6 +45,17 @@ const ConsumerDashboard: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [devices]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setDeviceDetails(prev => ({ ...prev, image: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const awardPoints = (amount: number) => {
     setStats(prev => {
@@ -93,13 +106,14 @@ const ConsumerDashboard: React.FC = () => {
       condition: action === 'EOL' ? 'Total Hardware Failure (EOL)' : deviceDetails.condition.replace(/_/g, ' '),
       status: status,
       owner: 'Self',
+      image: deviceDetails.image
     };
     
     awardPoints(pointsAwarded);
     setDevices([newDevice, ...devices]);
     setShowForm(false);
     setView('OVERVIEW');
-    setDeviceDetails({ category: '', type: '', age: '', condition: '' });
+    setDeviceDetails({ category: '', type: '', age: '', condition: '', image: '' });
   };
 
   const handleReferral = () => {
@@ -405,7 +419,7 @@ const ConsumerDashboard: React.FC = () => {
                <div className="flex justify-between items-center mb-8">
                  <h2 className="text-2xl font-black text-slate-900 leading-tight uppercase italic">New Lifecycle Entry</h2>
                  <button 
-                   onClick={() => { setShowForm(false); setDeviceDetails({ category: '', type: '', age: '', condition: '' }); }} 
+                   onClick={() => { setShowForm(false); setDeviceDetails({ category: '', type: '', age: '', condition: '', image: '' }); }} 
                    className="text-slate-400 hover:text-slate-600"
                  >
                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -413,12 +427,42 @@ const ConsumerDashboard: React.FC = () => {
                </div>
                
                <div className="space-y-6">
+                 {/* IMAGE UPLOAD ZONE */}
+                 <div className="space-y-3">
+                    <label className="text-xs font-black uppercase text-slate-400 tracking-widest">Device Verification Photo</label>
+                    <div 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="relative w-full h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl overflow-hidden group cursor-pointer hover:border-emerald-500 transition-all flex flex-col items-center justify-center text-center shadow-inner"
+                    >
+                       {deviceDetails.image ? (
+                         <>
+                           <img src={deviceDetails.image} className="w-full h-full object-cover" alt="Preview" />
+                           <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                              <span className="text-white text-xs font-black uppercase tracking-widest">Change Photo</span>
+                           </div>
+                         </>
+                       ) : (
+                         <div className="space-y-2">
+                            <div className="text-3xl grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all">📸</div>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-emerald-600">Click to upload device image</p>
+                         </div>
+                       )}
+                       <input 
+                         type="file" 
+                         ref={fileInputRef} 
+                         onChange={handleImageUpload} 
+                         accept="image/*" 
+                         className="hidden" 
+                       />
+                    </div>
+                 </div>
+
                  <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-xs font-black uppercase text-slate-400 tracking-widest">Device Category</label>
                       <select 
                         value={deviceDetails.category}
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none appearance-none"
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none appearance-none shadow-inner"
                         onChange={(e) => setDeviceDetails({...deviceDetails, category: e.target.value as DeviceCategory})}
                       >
                         <option value="">Select category...</option>
@@ -435,7 +479,7 @@ const ConsumerDashboard: React.FC = () => {
                         type="text" 
                         value={deviceDetails.type}
                         placeholder="e.g. MacBook Pro, Dyson Vacuum" 
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none"
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none shadow-inner"
                         onChange={(e) => setDeviceDetails({...deviceDetails, type: e.target.value})}
                       />
                     </div>
@@ -448,7 +492,7 @@ const ConsumerDashboard: React.FC = () => {
                         type="number" 
                         value={deviceDetails.age}
                         placeholder="e.g. 3" 
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none"
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none shadow-inner"
                         onChange={(e) => setDeviceDetails({...deviceDetails, age: e.target.value})}
                       />
                     </div>
@@ -456,7 +500,7 @@ const ConsumerDashboard: React.FC = () => {
                       <label className="text-xs font-black uppercase text-slate-400 tracking-widest">Identify Primary Issue</label>
                       <select 
                         value={deviceDetails.condition}
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none appearance-none"
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none appearance-none shadow-inner"
                         onChange={(e) => setDeviceDetails({...deviceDetails, condition: e.target.value})}
                       >
                         <option value="">Identify problem...</option>
@@ -491,7 +535,6 @@ const ConsumerDashboard: React.FC = () => {
                         </optgroup>
                         <optgroup label="Connectivity">
                           <option value="wifi_failure">Wi-Fi / Bluetooth Failure</option>
-                          <span>•</span>
                           <option value="cellular_signal">No Cellular / SIM Slot Damage</option>
                         </optgroup>
                         <optgroup label="Total Asset Failure">
@@ -551,7 +594,7 @@ const ConsumerDashboard: React.FC = () => {
             <div className="lg:col-span-8 space-y-8">
               <section className="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm">
                 <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                  <h3 className="text-xl font-black text-slate-800">Your Impact Timeline</h3>
+                  <h3 className="text-xl font-black text-slate-800 italic uppercase">Your Impact Timeline</h3>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left min-w-[600px]">
@@ -567,8 +610,12 @@ const ConsumerDashboard: React.FC = () => {
                         <tr key={d.id} className="group hover:bg-blue-50/30 transition-all">
                           <td className="px-8 py-6">
                             <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-xl group-hover:bg-white shadow-sm" title={d.category}>
-                                {getCategoryIcon(d.category)}
+                              <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-xl group-hover:bg-white shadow-sm overflow-hidden" title={d.category}>
+                                {d.image ? (
+                                  <img src={d.image} className="w-full h-full object-cover" alt={d.type} />
+                                ) : (
+                                  getCategoryIcon(d.category)
+                                )}
                               </div>
                               <div>
                                 <p className="font-bold text-slate-900">{d.type}</p>
@@ -718,7 +765,7 @@ const ConsumerDashboard: React.FC = () => {
            <section className="bg-white border border-slate-200 rounded-[3rem] p-12 shadow-sm space-y-12">
               <div className="flex justify-between items-end border-b border-slate-100 pb-10">
                  <div className="space-y-2">
-                    <h2 className="text-4xl font-black text-slate-900 tracking-tighter uppercase italic">Rewards Hub</h2>
+                    <h2 className="text-4xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Rewards Hub</h2>
                     <p className="text-sm font-medium text-slate-400">Exchange Green Credits for verified services.</p>
                  </div>
                  <div className="bg-slate-900 text-white px-8 py-4 rounded-[1.5rem] flex items-center gap-4 shadow-2xl">
@@ -767,8 +814,8 @@ const ConsumerDashboard: React.FC = () => {
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-900/90 backdrop-blur-xl animate-in fade-in">
            <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl overflow-hidden animate-in slide-in-from-bottom-8 border border-white/20">
               <div className="bg-gradient-to-r from-emerald-600 to-blue-700 h-32 flex items-center justify-between px-10">
-                 <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">Impact Certificate</h2>
-                 <button onClick={() => setActiveCertificate(null)} className="p-3 bg-white/20 rounded-2xl text-white">
+                 <h2 className="text-2xl font-black text-white uppercase italic tracking-tight leading-none">Impact Certificate</h2>
+                 <button onClick={() => setActiveCertificate(null)} className="p-3 bg-white/20 rounded-2xl text-white hover:bg-white/30 transition-all">
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M6 18L18 6M6 6l12 12" strokeWidth={3}/></svg>
                  </button>
               </div>
@@ -781,7 +828,7 @@ const ConsumerDashboard: React.FC = () => {
                     <div><p className="text-3xl font-black text-emerald-600">4.2kg</p><p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Weight Diverted</p></div>
                     <div><p className="text-3xl font-black text-blue-600">8.1kg</p><p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">CO2 Offset</p></div>
                  </div>
-                 <button className="px-10 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest">Download Official PDF</button>
+                 <button className="px-10 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl">Download Official PDF</button>
               </div>
            </div>
         </div>
@@ -840,7 +887,7 @@ const ImpactScoreCard: React.FC<{ label: string, value: string, sub: string, ico
       <span className="text-2xl">{icon}</span>
       <span className="text-[10px] font-black uppercase tracking-widest text-white/40">{label}</span>
     </div>
-    <p className="text-3xl font-black mb-1 tracking-tighter">{value}</p>
+    <p className="text-3xl font-black mb-1 tracking-tighter leading-none">{value}</p>
     <p className="text-[10px] text-white/50 font-bold">{sub}</p>
   </div>
 );
