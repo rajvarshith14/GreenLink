@@ -373,48 +373,55 @@ const NGODashboard: React.FC = () => {
         </section>
       )}
 
-      {/* HERO PROFILE MODAL */}
+      {/* HERO PROFILE MODAL - REDESIGNED */}
       {selectedHero && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-xl animate-in fade-in">
-           <div className="bg-white rounded-[4rem] shadow-2xl w-full max-w-2xl p-0 overflow-hidden animate-in zoom-in-95 border border-white/20">
-              <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-12 text-white relative">
-                 <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none group-hover:rotate-12 transition-transform">
-                   <svg className="w-48 h-48" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z"/></svg>
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 sm:p-6 bg-slate-900/80 backdrop-blur-xl animate-in fade-in duration-300">
+           <div className="absolute inset-0 cursor-pointer" onClick={() => setSelectedHero(null)}></div>
+           <div className="bg-white rounded-[2.5rem] sm:rounded-[3rem] shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden animate-in zoom-in-95 border border-white/20 relative flex flex-col">
+              
+              {/* FIXED HEADER - PREVENTS STRETCHING */}
+              <div className="bg-slate-900 p-8 sm:p-10 text-white relative shrink-0">
+                 <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
+                   <svg className="w-32 h-32 sm:w-40 sm:h-40" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z"/></svg>
                  </div>
-                 <div className="flex justify-between items-start relative z-10">
-                   <div className="flex items-center gap-10">
-                     <div className="w-28 h-28 bg-emerald-500 rounded-[2.5rem] flex items-center justify-center text-5xl font-black shadow-2xl border-4 border-white/20 uppercase">
+                 <div className="flex justify-between items-center relative z-10">
+                   <div className="flex items-center gap-6">
+                     <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-500 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-black shadow-xl border-2 border-white/20 uppercase shrink-0">
                        {selectedHero.name[0]}
                      </div>
-                     <div className="space-y-3">
-                        <div className="flex items-center gap-4">
-                           <h2 className="text-4xl font-black tracking-tighter leading-none">{selectedHero.name}</h2>
-                           <div className="w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white">
-                              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" /></svg>
+                     <div className="space-y-1">
+                        <div className="flex items-center gap-3">
+                           <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-none italic uppercase">{selectedHero.name}</h2>
+                           <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white shadow-lg">
+                              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={5} d="M5 13l4 4L19 7" /></svg>
                            </div>
                         </div>
-                        <p className="text-[11px] font-black uppercase text-emerald-400 tracking-[0.4em]">{selectedHero.category}</p>
+                        <p className="text-[10px] font-black uppercase text-emerald-400 tracking-[0.3em]">{selectedHero.category}</p>
                      </div>
                    </div>
-                   <button onClick={() => setSelectedHero(null)} className="p-3 bg-white/10 rounded-2xl text-white hover:bg-white/20 transition-all border border-white/10">
-                     <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
+                   <button 
+                    onClick={() => setSelectedHero(null)} 
+                    className="p-3 bg-white/10 rounded-xl text-white hover:bg-white/20 transition-all border border-white/10 flex items-center justify-center"
+                   >
+                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
                    </button>
                  </div>
               </div>
 
-              <div className="p-14 space-y-12">
-                 <div className="grid grid-cols-3 gap-10 text-center bg-slate-50 p-10 rounded-[2.5rem] border border-slate-100 shadow-inner">
+              {/* SCROLLABLE BODY - PROPER PADDING AND SPACING */}
+              <div className="p-8 sm:p-10 space-y-8 overflow-y-auto custom-scrollbar flex-grow">
+                 <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center bg-slate-50 p-6 rounded-3xl border border-slate-100 shadow-inner">
                     <HeroImpact label="CO2 Prevented" value={`${(parseInt(selectedHero.impact) * 0.8).toFixed(1)}kg`} color="text-blue-600" />
                     <HeroImpact label="Toxins Blocked" value={selectedHero.toxinsDiverted} color="text-emerald-600" />
                     <HeroImpact label="Regional Rank" value={`#${selectedHero.regionalRank}`} color="text-slate-900" />
                  </div>
 
-                 <div className="space-y-6">
-                    <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] border-b border-slate-100 pb-4 flex items-center gap-3">
+                 <div className="space-y-4">
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] border-b border-slate-100 pb-3 flex items-center gap-2">
                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                        Asset Contribution Summary
                     </h4>
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                        <HeroStatRow label="Computing Units" value={selectedHero.contributions.laptops} icon="💻" />
                        <HeroStatRow label="Mobile Devices" value={selectedHero.contributions.phones} icon="📱" />
                        <HeroStatRow label="Total Net Mass" value={selectedHero.impact} icon="⚖️" />
@@ -422,9 +429,32 @@ const NGODashboard: React.FC = () => {
                     </div>
                  </div>
 
-                 <div className="flex gap-4 pt-4">
-                    <button className="flex-grow py-5 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-emerald-600 transition-all shadow-2xl active:scale-95">Endorse Impact Certificate</button>
-                    <button className="px-10 py-5 border-2 border-slate-100 text-slate-900 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-slate-50 transition-all">Full Audit Trace</button>
+                 <div className="space-y-4">
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] border-b border-slate-100 pb-3 flex items-center gap-2">
+                       <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                       Verified Credentials
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                       {selectedHero.badges.map((badge, i) => (
+                         <span key={i} className="px-4 py-2 bg-blue-50 text-blue-700 text-[10px] font-black uppercase tracking-widest rounded-xl border border-blue-100">
+                           {badge}
+                         </span>
+                       ))}
+                       <span className="px-4 py-2 bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-widest rounded-xl border border-emerald-100">
+                         Identity Verified
+                       </span>
+                    </div>
+                 </div>
+
+                 {/* EXTRA SPACE FOR SCROLLING CLEARANCE */}
+                 <div className="h-4"></div>
+              </div>
+
+              {/* FIXED FOOTER - NO OVERLAP ON TEXT */}
+              <div className="p-8 sm:p-10 bg-white border-t border-slate-100 shrink-0">
+                 <div className="flex flex-col sm:flex-row gap-4">
+                    <button className="flex-grow py-4 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] hover:bg-emerald-600 transition-all shadow-xl active:scale-95">Endorse Impact Certificate</button>
+                    <button className="sm:w-1/3 py-4 border-2 border-slate-100 text-slate-900 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] hover:bg-slate-50 transition-all">Full Audit Trace</button>
                  </div>
               </div>
            </div>
@@ -528,20 +558,21 @@ const MiniMetric: React.FC<{ label: string, value: string, percent: number, colo
 );
 
 const HeroImpact: React.FC<{ label: string, value: string, color: string }> = ({ label, value, color }) => (
-  <div className="space-y-1.5">
+  <div className="space-y-1">
      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">{label}</p>
-     <p className={`text-3xl font-black tracking-tighter leading-none ${color}`}>{value}</p>
+     <p className={`text-xl sm:text-2xl font-black tracking-tighter leading-none ${color}`}>{value}</p>
   </div>
 );
 
 const HeroStatRow: React.FC<{ label: string, value: number | string, icon: string }> = ({ label, value, icon }) => (
-  <div className="flex items-center gap-5 p-5 bg-white rounded-3xl border border-slate-100 hover:border-emerald-200 transition-colors shadow-sm">
-     <div className="text-2xl" aria-hidden="true">{icon}</div>
-     <div className="flex-grow">
-        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
-        <p className="text-sm font-black text-slate-800 leading-tight">{value}</p>
+  <div className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-100 hover:border-emerald-200 transition-colors shadow-sm">
+     <div className="text-xl sm:text-2xl" aria-hidden="true">{icon}</div>
+     <div className="flex-grow min-w-0">
+        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest truncate">{label}</p>
+        <p className="text-sm font-black text-slate-800 leading-tight truncate">{value}</p>
      </div>
   </div>
 );
 
 export default NGODashboard;
+
